@@ -1,3 +1,3 @@
 |   | A |
 |---|---|
-| 2 | B1+OneRange |
+| __2__ | B1+OneRange |

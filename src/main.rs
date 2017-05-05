@@ -144,7 +144,7 @@ fn write_range<P, T>(path: P, range: Range<T>) -> Result<()>
     // next rows: table data
     let srow = srow as usize + 1;
     for (i, row) in range.rows().enumerate() {
-        write!(f, "| {} ", srow + i)?;
+        write!(f, "| __{}__ ", srow + i)?;
         for c in row {
             write!(f, "| {} ", c)?;
         }
