@@ -93,7 +93,7 @@ impl XlPaths {
         if !root.exists() {
             fs::create_dir_all(&root)?;
         }
-        let data = root.join("sheets");
+        let data = root.join("data");
         if !data.exists() {
             fs::create_dir(&data)?;
         }
