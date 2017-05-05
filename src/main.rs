@@ -70,7 +70,6 @@ struct XlPaths {
 }
 
 impl XlPaths {
-
     fn new(orig: PathBuf) -> Result<XlPaths> {
 
         if !orig.exists() {
@@ -113,7 +112,7 @@ impl XlPaths {
             formula: formula,
             vba: vba,
             refs: root.join("refs.md"),
-            names: root.join("names.txt"),
+            names: root.join("names.md"),
         })
     }
 }
@@ -128,21 +127,42 @@ fn write_range<P, T>(path: P, range: Range<T>) -> Result<()>
 
     let mut f = BufWriter::new(fs::File::create(path.as_ref())?);
 
+    let ((srow, scol), (_, ecol)) = (range.start(), range.end());
+    write!(f, "|   ")?;
+    for c in scol..ecol+1 {
+        write!(f, "| {} ", get_column(c))?;
+    }
+    writeln!(f, "|")?;
+    for _ in scol..ecol+2 {
+        write!(f, "|---")?;
+    }
+    writeln!(f, "|")?;
+
     // next rows: table data
-    let mut is_first = true;
-    for row in range.rows().skip(1) {
+    let srow = srow as usize + 1;
+    for (i, row) in range.rows().enumerate() {
+        write!(f, "| {} ", srow + i)?;
         for c in row {
             write!(f, "| {:?} ", c)?;
         }
         writeln!(f, "|")?;
-        if is_first {
-            // first row: consider as header
-            for _ in &range[0] {
-                write!(f, "|---")?;
-            }
-            writeln!(f, "|")?;
-            is_first = false;
-        }
     }
     Ok(())
+}
+
+fn get_column(mut col: u32) -> String {
+    let mut buf = String::new();
+    if col < 26 {
+        buf.push((b'A' + col as u8) as char);
+    } else {
+        let mut rev = String::new();
+        while col >= 26 {
+            let c = col % 26;
+            rev.push((b'A' + c as u8) as char);
+            col -= c;
+            col /= 26;
+        }
+        buf.extend(rev.chars().rev());
+    }
+    buf
 }
