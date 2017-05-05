@@ -90,9 +90,10 @@ impl XlPaths {
             .map_or::<PathBuf, _>(".{}".into(), |p| p.into())
             .join(format!(".{}", &*orig.file_name().unwrap().to_string_lossy()));
 
-        if !root.exists() {
-            fs::create_dir_all(&root)?;
+        if root.exists() {
+            fs::remove_dir_all(&root)?;
         }
+        fs::create_dir_all(&root)?;
         let data = root.join("data");
         if !data.exists() {
             fs::create_dir(&data)?;
