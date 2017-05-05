@@ -7,8 +7,12 @@ xl2txt /my/excel/filename.xlsx
 ```
 
 This command will per default create a `/my/excel/.filename` directory which contains:
-- parsed data from every worksheet in the `data` sub directory
-- parsed formula from every worksheet in the `formula` sub directory
-- references used in vba in `refs.md` file
-- defined names used within the workbook into `names.md` file
-- vba modules in `vba` sub directory
+- `data/sheet_name.md` files for cells value. [example](https://github.com/tafia/xl2txt/blob/master/tests/.issues.xlsb/data/datatypes.md)
+- `formula/sheet_name.md` files for cells formula [example](https://github.com/tafia/xl2txt/blob/master/tests/.issues.xlsb/formula/datatypes.md)
+- `refs.md` file for all references. [example](https://github.com/tafia/xl2txt/blob/master/tests/.issues.xlsb/refs.md)
+- `names.md` file for all defined names. [example](https://github.com/tafia/xl2txt/blob/master/tests/.issues.xlsb/names.md)
+- `vba/module_name.vb` files for each module. [example](https://github.com/tafia/xl2txt/blob/master/tests/.issues.xlsb/vba/testVBA.vb)
+
+Internally it relies heavily on [calamine](https://github.com/tafia/calamine) crate.
+
+Supports all kind of excel files (xls, xlsx, xlsm, xlsb, xla, xlam) and ods files.
