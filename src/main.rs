@@ -8,16 +8,18 @@ use std::path::{PathBuf, Path};
 use std::fs;
 use std::io::{BufWriter, Write};
 use errors::Result;
-use calamine::{Sheets, Range};
+use calamine::{Sheets, Range, CellType};
 
 fn main() {
-    let file = ::std::env::args().skip(1).next().expect("USAGE: xl2txt file");
-    run(file.into()).unwrap();
+    let mut args = ::std::env::args();
+    let file = args.by_ref().skip(1).next().expect("USAGE: xl2txt file [root]");
+    let root = args.next().map(|r| r.into());
+    run(file.into(), root).unwrap();
 }
 
-fn run(file: PathBuf) -> Result<()> {
+fn run(file: PathBuf, root: Option<PathBuf>) -> Result<()> {
 
-    let paths = XlPaths::new(file)?;
+    let paths = XlPaths::new(file, root)?;
     let mut xl = Sheets::open(&paths.orig)?;
 
     // defined names
@@ -70,7 +72,7 @@ struct XlPaths {
 }
 
 impl XlPaths {
-    fn new(orig: PathBuf) -> Result<XlPaths> {
+    fn new(orig: PathBuf, root: Option<PathBuf>) -> Result<XlPaths> {
 
         if !orig.exists() {
             bail!("Cannot find {}", orig.display());
@@ -86,9 +88,9 @@ impl XlPaths {
             None => bail!("Expecting an excel file, couln't find an extension"),
         }
 
-        let root: PathBuf = orig.parent()
-            .map_or::<PathBuf, _>(".{}".into(), |p| p.into())
-            .join(format!(".{}", &*orig.file_name().unwrap().to_string_lossy()));
+        let root_next = format!(".{}", &*orig.file_name().unwrap().to_string_lossy());
+        let root = root.unwrap_or_else(|| orig.parent().map_or(".".into(), |p| p.into()))
+            .join(root_next);
 
         if root.exists() {
             fs::remove_dir_all(&root)?;
@@ -120,7 +122,7 @@ impl XlPaths {
 
 fn write_range<P, T>(path: P, range: Range<T>) -> Result<()> 
     where P: AsRef<Path>, 
-          T: PartialEq + Clone + Default + ::std::fmt::Debug,
+          T: CellType + ::std::fmt::Display,
 {
     if range.is_empty() {
         return Ok(());
@@ -144,7 +146,7 @@ fn write_range<P, T>(path: P, range: Range<T>) -> Result<()>
     for (i, row) in range.rows().enumerate() {
         write!(f, "| {} ", srow + i)?;
         for c in row {
-            write!(f, "| {:?} ", c)?;
+            write!(f, "| {} ", c)?;
         }
         writeln!(f, "|")?;
     }
