@@ -1,0 +1,14 @@
+#!/bin/bash
+
+d=$(dirname "$1")
+f=$(basename "$1")
+
+../target/release/xl2txt "$1" "$d"
+
+root=$d/.$f
+
+for fi in $(find $root | sort)
+do
+    echo ${fi#*$root}
+    cat $fi
+done
