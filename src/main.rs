@@ -12,7 +12,10 @@ use calamine::{Sheets, Range, CellType};
 
 fn main() {
     let mut args = ::std::env::args();
-    let file = args.by_ref().skip(1).next().expect("USAGE: xl2txt file [root]");
+    let file = args.by_ref()
+        .skip(1)
+        .next()
+        .expect("USAGE: xl2txt file [root]");
     let root = args.next().map(|r| r.into());
     run(file.into(), root).unwrap();
 }
@@ -35,8 +38,10 @@ fn run(file: PathBuf, root: Option<PathBuf>) -> Result<()> {
     // sheets
     let sheets = xl.sheet_names()?;
     for s in sheets {
-        write_range(paths.data.join(format!("{}.md", &s)), xl.worksheet_range(&s)?)?;
-        write_range(paths.formula.join(format!("{}.md", &s)), xl.worksheet_formula(&s)?)?;
+        write_range(paths.data.join(format!("{}.md", &s)),
+                    xl.worksheet_range(&s)?)?;
+        write_range(paths.formula.join(format!("{}.md", &s)),
+                    xl.worksheet_formula(&s)?)?;
     }
 
     // vba
@@ -55,7 +60,11 @@ fn run(file: PathBuf, root: Option<PathBuf>) -> Result<()> {
         writeln!(f, "| Name | Description | Path |")?;
         writeln!(f, "|------|-------------|------|")?;
         for r in vba.get_references() {
-            writeln!(f, "| {} | {} | {} |", r.name, r.description, r.path.display())?;
+            writeln!(f,
+                     "| {} | {} | {} |",
+                     r.name,
+                     r.description,
+                     r.path.display())?;
         }
     }
 
@@ -81,9 +90,10 @@ impl XlPaths {
         if !orig.is_file() {
             bail!("{} is not a file", orig.display());
         }
-        
+
         match orig.extension().and_then(|e| e.to_str()) {
-            Some("xls") | Some("xlsx") | Some("xlsb") | Some("ods") => (),
+            Some("xls") | Some("xlsx") | Some("xlsb") | Some("xlsm") | Some("xla") |
+            Some("xlam") | Some("ods") => (),
             Some(e) => bail!("Unrecognized extension: {}", e),
             None => bail!("Expecting an excel file, couln't find an extension"),
         }
@@ -110,19 +120,19 @@ impl XlPaths {
         }
 
         Ok(XlPaths {
-            orig: orig,
-            data: data,
-            formula: formula,
-            vba: vba,
-            refs: root.join("refs.md"),
-            names: root.join("names.md"),
-        })
+               orig: orig,
+               data: data,
+               formula: formula,
+               vba: vba,
+               refs: root.join("refs.md"),
+               names: root.join("names.md"),
+           })
     }
 }
 
-fn write_range<P, T>(path: P, range: Range<T>) -> Result<()> 
-    where P: AsRef<Path>, 
-          T: CellType + ::std::fmt::Display,
+fn write_range<P, T>(path: P, range: Range<T>) -> Result<()>
+    where P: AsRef<Path>,
+          T: CellType + ::std::fmt::Display
 {
     if range.is_empty() {
         return Ok(());
@@ -132,11 +142,11 @@ fn write_range<P, T>(path: P, range: Range<T>) -> Result<()>
 
     let ((srow, scol), (_, ecol)) = (range.start(), range.end());
     write!(f, "|   ")?;
-    for c in scol..ecol+1 {
+    for c in scol..ecol + 1 {
         write!(f, "| {} ", get_column(c))?;
     }
     writeln!(f, "|")?;
-    for _ in scol..ecol+2 {
+    for _ in scol..ecol + 2 {
         write!(f, "|---")?;
     }
     writeln!(f, "|")?;
