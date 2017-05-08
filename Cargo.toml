@@ -9,5 +9,5 @@ readme = "README.md"
 keywords = ["excel", "markdown", "txt", "git", "ods"]
 
 [dependencies]
-calamine = "0.11.3"
+calamine = "0.11.4"
 error-chain = "0.10.0"
