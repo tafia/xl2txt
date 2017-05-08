@@ -1,6 +1,6 @@
 [package]
 name = "xl2txt"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Johann Tuffe <tafia973@gmail.com>"]
 repository = "https://github.com/tafia/xl2txt"
 description = "A tool to convert excel files into *.md *.vb files. Can be used for git difftools"
